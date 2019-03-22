@@ -8,7 +8,12 @@ open class FPNCountryPicker: UIPickerView, UIPickerViewDelegate, UIPickerViewDat
 		}
 	}
 
-	open var selectedLocale: Locale?
+    open var selectedLocale: Locale? {
+        didSet {
+            reloadAllComponents()
+        }
+    }
+    
 	weak var countryPickerDelegate: FPNCountryPickerDelegate?
 	open var showPhoneNumbers: Bool = true
 
@@ -55,6 +60,7 @@ open class FPNCountryPicker: UIPickerView, UIPickerViewDelegate, UIPickerViewDat
 
 	open func setLocale(_ locale: String) {
 		self.selectedLocale = Locale(identifier: locale)
+        countries = getAllCountries()
 	}
 
 	// MARK: - FPNCountry Methods
@@ -115,17 +121,9 @@ open class FPNCountryPicker: UIPickerView, UIPickerViewDelegate, UIPickerViewDat
 					guard let countryObj = jsonObject as? NSDictionary else { return countries }
 					guard let code = countryObj["code"] as? String, let phoneCode = countryObj["dial_code"] as? String, let name = countryObj["name"] as? String else { return countries }
 
-					if let locale = self.selectedLocale {
-						let country = FPNCountry(code: code, name: locale.localizedString(forRegionCode: code) ?? name, phoneCode: phoneCode)
-
-						countries.append(country)
-					} else {
-						let country = FPNCountry(code: code, name: name, phoneCode: phoneCode)
-
-						countries.append(country)
-					}
+                    let country = FPNCountry(code: code, name: name, phoneCode: phoneCode)
+                    countries.append(country)
 				}
-
 			}
 		} catch let error {
 			assertionFailure(error.localizedDescription)
@@ -177,6 +175,7 @@ open class FPNCountryPicker: UIPickerView, UIPickerViewDelegate, UIPickerViewDat
 			resultView = view as! FPNCountryView
 		}
 
+        resultView.locale = selectedLocale ?? .current
 		resultView.setup(countries[row])
 
 		if !showPhoneNumbers {

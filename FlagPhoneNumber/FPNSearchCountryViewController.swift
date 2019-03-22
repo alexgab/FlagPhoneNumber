@@ -13,6 +13,14 @@ class FPNSearchCountryViewController: UITableViewController, UISearchResultsUpda
 	var searchController: UISearchController?
 	var list: [FPNCountry]?
 	var results: [FPNCountry]?
+    
+    var locale: Locale = .current {
+        didSet {
+            if isViewLoaded {
+                tableView.reloadData()
+            }
+        }
+    }
 
 	var delegate: FPNDelegate?
 
@@ -104,8 +112,8 @@ class FPNSearchCountryViewController: UITableViewController, UISearchResultsUpda
 	override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 		let cell = UITableViewCell(style: .value1, reuseIdentifier: nil)
 		let country = getItem(at: indexPath)
-
-		cell.textLabel?.text = country.name
+        
+		cell.textLabel?.text = locale.localizedString(forRegionCode: country.code.rawValue) ?? country.name
 		cell.detailTextLabel?.text = country.phoneCode
 		cell.imageView?.image = country.flag
 

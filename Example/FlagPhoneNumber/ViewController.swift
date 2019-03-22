@@ -27,6 +27,8 @@ class ViewController: UIViewController {
 		// Comment this line to not have access to the country list
 		phoneNumberTextField.parentViewController = self
 		phoneNumberTextField.delegate = self
+        phoneNumberTextField.locale = Locale(identifier: "en_US")
+        phoneNumberTextField.countrySelectionMode = .search
 
 		// Custom the size/edgeInsets of the flag button
 		phoneNumberTextField.flagSize = CGSize(width: 35, height: 35)

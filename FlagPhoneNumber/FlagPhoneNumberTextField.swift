@@ -9,8 +9,15 @@
 import Foundation
 import libPhoneNumber_iOS
 
+public enum FPNCountrySelectionMode {
+    case picker
+    case search
+}
+
 open class FPNTextField: UITextField, FPNCountryPickerDelegate, FPNDelegate {
 
+    public var countrySelectionMode: FPNCountrySelectionMode = .picker
+    
 	/// The size of the flag
 	public var flagSize: CGSize = CGSize(width: 32, height: 32) {
 		didSet {
@@ -25,6 +32,13 @@ open class FPNTextField: UITextField, FPNCountryPickerDelegate, FPNDelegate {
 		}
 	}
 
+    /// The edges insets of the flag button
+    open var locale: Locale = Locale(identifier: "en_US") {
+        didSet {
+            countryPicker.selectedLocale = locale
+        }
+    }
+    
 	/// The size of the leftView
 	private var leftViewSize: CGSize {
 		let width = flagSize.width + flagButtonEdgeInsets.left + flagButtonEdgeInsets.right + phoneCodeTextField.frame.width
@@ -118,7 +132,7 @@ open class FPNTextField: UITextField, FPNCountryPickerDelegate, FPNDelegate {
 		setupPhoneCodeTextField()
 		setupLeftView()
 		setupCountryPicker()
-
+        
 		keyboardType = .phonePad
 		autocorrectionType = .no
 		addTarget(self, action: #selector(didEditText), for: .editingChanged)
@@ -130,7 +144,7 @@ open class FPNTextField: UITextField, FPNCountryPickerDelegate, FPNDelegate {
 		flagButton.contentVerticalAlignment = .fill
 		flagButton.imageView?.contentMode = .scaleAspectFit
 		flagButton.accessibilityLabel = "flagButton"
-		flagButton.addTarget(self, action: #selector(displayCountryKeyboard), for: .touchUpInside)
+		flagButton.addTarget(self, action: #selector(flagButtonAction), for: .touchUpInside)
 		flagButton.translatesAutoresizingMaskIntoConstraints = false
 		flagButton.setContentHuggingPriority(UILayoutPriority.defaultLow, for: .horizontal)
 	}
@@ -169,6 +183,16 @@ open class FPNTextField: UITextField, FPNCountryPickerDelegate, FPNDelegate {
 		}
 	}
 
+    @objc private func flagButtonAction() {
+        switch countrySelectionMode {
+        case .picker:
+            displayCountryKeyboard()
+        case .search:
+            showSearchController()
+        }
+        
+    }
+    
 	@objc private func displayNumberKeyBoard() {
 		inputView = nil
 		inputAccessoryView = textFieldInputAccessoryView
@@ -331,6 +355,7 @@ open class FPNTextField: UITextField, FPNCountryPickerDelegate, FPNDelegate {
 			let navigationViewController = UINavigationController(rootViewController: searchCountryViewController)
 
 			searchCountryViewController.delegate = self
+            searchCountryViewController.locale = locale
 
 			parentViewController?.present(navigationViewController, animated: true, completion: nil)
 		}
@@ -384,7 +409,8 @@ open class FPNTextField: UITextField, FPNCountryPickerDelegate, FPNDelegate {
 	// - FPNCountryPickerDelegate
 
 	func countryPhoneCodePicker(_ picker: FPNCountryPicker, didSelectCountry country: FPNCountry) {
-		(delegate as? FPNTextFieldDelegate)?.fpnDidSelectCountry(name: country.name, dialCode: country.phoneCode, code: country.code.rawValue)
+        let localizedCountryName = locale.localizedString(forRegionCode: country.code.rawValue) ?? country.name
+		(delegate as? FPNTextFieldDelegate)?.fpnDidSelectCountry(name: localizedCountryName, dialCode: country.phoneCode, code: country.code.rawValue)
 		selectedCountry = country
 	}
 

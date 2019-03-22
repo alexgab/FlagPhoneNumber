@@ -1,10 +1,10 @@
 import Foundation
 
-struct FPNCountry {
-	var code: FPNCountryCode
-	var name: String
-	var phoneCode: String
-	var flag: UIImage?
+public struct FPNCountry {
+	let code: FPNCountryCode
+	let name: String
+	let phoneCode: String
+	let flag: UIImage?
 
 	init(code: String, name: String, phoneCode: String) {
 		self.name = name
